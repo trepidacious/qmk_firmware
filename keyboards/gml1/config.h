@@ -27,13 +27,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define PRODUCT GML1
 #define DESCRIPTION Great Mountain Lizard 1
 
-/* key matrix size */
-#define MATRIX_ROWS 4
-#define MATRIX_COLS 4
+// /* key matrix size */
+// #define MATRIX_ROWS 4
+// #define MATRIX_COLS 4
 
-#define MATRIX_COL_PINS { B7, B8, B9, B10 }
-#define MATRIX_ROW_PINS { B3, B4, B5, B6 }
-#define DIODE_DIRECTION COL2ROW
+// #define MATRIX_COL_PINS { B7, B8, B9, B10 }
+// #define MATRIX_ROW_PINS { B3, B4, B5, B6 }
+// #define DIODE_DIRECTION COL2ROW
+
+/* key matrix size */
+#define MATRIX_ROWS 1
+#define MATRIX_COLS 1
+
+/* One direct connection on A0 */
+#define DIRECT_PINS { \
+    {A0}  \
+}
 
 //LEDS A6, RGB B15
 

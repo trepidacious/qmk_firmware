@@ -305,6 +305,27 @@
 /* SERIAL_USB driver related setting.                                        */
 /*===========================================================================*/
 
+//TODO BMW have a look at this? Assuming it's not used anyway, discovery
+//demo values are below.
+// /**
+//  * @brief   Serial over USB buffers size.
+//  * @details Configuration parameter, the buffer size must be a multiple of
+//  *          the USB data endpoint maximum packet size.
+//  * @note    The default is 256 bytes for both the transmission and receive
+//  *          buffers.
+//  */
+// #if !defined(SERIAL_USB_BUFFERS_SIZE) || defined(__DOXYGEN__)
+// #define SERIAL_USB_BUFFERS_SIZE     256
+// #endif
+
+// /**
+//  * @brief   Serial over USB number of buffers.
+//  * @note    The default is 2 buffers.
+//  */
+// #if !defined(SERIAL_USB_BUFFERS_NUMBER) || defined(__DOXYGEN__)
+// #define SERIAL_USB_BUFFERS_NUMBER   2
+// #endif
+
 /**
  * @brief   Serial over USB buffers size.
  * @details Configuration parameter, the buffer size must be a multiple of

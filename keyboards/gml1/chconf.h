@@ -105,9 +105,10 @@
  */
 #define CH_CFG_NO_IDLE_THREAD               FALSE
 
+//TODO BMW check this - was in original 072 version
 /* Use __WFI in the idle thread for waiting. Does lower the power
  * consumption. */
-#define CORTEX_ENABLE_WFI_IDLE              TRUE
+// #define CORTEX_ENABLE_WFI_IDLE              TRUE
 
 /** @} */
 
@@ -118,6 +119,7 @@
  */
 /*===========================================================================*/
 
+//BMW cahnged to true
 /**
  * @brief   OS optimization.
  * @details If enabled then time efficient rather than space efficient code
@@ -126,7 +128,7 @@
  * @note    This is not related to the compiler optimization options.
  * @note    The default is @p TRUE.
  */
-#define CH_CFG_OPTIMIZE_SPEED               FALSE
+#define CH_CFG_OPTIMIZE_SPEED               TRUE
 
 /** @} */
 
