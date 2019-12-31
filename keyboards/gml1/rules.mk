@@ -49,12 +49,16 @@ ARMV = 7
 # BOOTMAGIC_ENABLE = yes      # Virtual DIP switch configuration
 MOUSEKEY_ENABLE = no        # Mouse keys
 EXTRAKEY_ENABLE = no	    # Audio control and System control
-CONSOLE_ENABLE = yes         # Console for debug
+CONSOLE_ENABLE = no         # Console for debug
 COMMAND_ENABLE = no         # Commands for debug and configuration
 NKRO_ENABLE = no            # USB Nkey Rollover
-NO_USB_STARTUP_CHECK = no   # Disable initialization only when usb is plugged in
 
-# WAIT_FOR_USB = yes
+# NO_USB_STARTUP_CHECK = no   # Wait for USB before startup
+# WAIT_FOR_USB = no
+
+# Disable for ARM
+LINK_TIME_OPTIMIZATION_ENABLE = no
+
 
 CUSTOM_MATRIX = no # Custom matrix file
 
