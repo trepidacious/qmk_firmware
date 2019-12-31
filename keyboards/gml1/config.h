@@ -36,12 +36,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // #define DIODE_DIRECTION COL2ROW
 
 /* key matrix size */
-#define MATRIX_ROWS 1
+#define MATRIX_ROWS 2
 #define MATRIX_COLS 1
 
 /* One direct connection on A0 */
 #define DIRECT_PINS { \
-    {A0}  \
+    {PAL_LINE(GPIOA, 3)}, \
+    {PAL_LINE(GPIOA, 2)} \
 }
 
 //LEDS A6, RGB B15
