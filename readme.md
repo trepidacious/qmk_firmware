@@ -20,8 +20,6 @@ Development of GML keyboards.
 4. `make gml1`
 5. To flash with openocd, use the `.elf` file in `.build` dir in root of project, with `openocd -f ~/Documents/GitHub/brew/share/openocd/scripts/board/stm32f4discovery.cfg -c "program .build/gml1_default.elf verify reset exit"`
 6. Update `.vscode/c_cpp_properies.json` with your brew installation path if necessary.
-7. For some reason, when compiling for Chibios, the qmk build only looks in `lib/chibios-contrib`, not `lib/chibios`, so you'll need to copy `lib/chibios/os/common/startup/ARMCMx/compilers/GCC/mk/startup_stm32f4xx.mk` to `lib/chibios-contrib/os/common/startup/ARMCMx/compilers/GCC/mk/startup_stm32f4xx.mk`
-
 
 # Quantum Mechanical Keyboard Firmware
 
