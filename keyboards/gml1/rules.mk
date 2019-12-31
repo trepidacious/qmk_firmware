@@ -54,6 +54,8 @@ COMMAND_ENABLE = no         # Commands for debug and configuration
 NKRO_ENABLE = no            # USB Nkey Rollover
 NO_USB_STARTUP_CHECK = no   # Disable initialization only when usb is plugged in
 
+# WAIT_FOR_USB = yes
+
 CUSTOM_MATRIX = no # Custom matrix file
 
 DEFAULT_FOLDER = gml1
