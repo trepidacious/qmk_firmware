@@ -46,6 +46,8 @@ ARMV = 7
 # NKRO_ENABLE = yes	    # USB Nkey Rollover
 
 
+SLEEP_LED_ENABLE = no  # Breathing sleep LED during USB suspend
+
 # BOOTMAGIC_ENABLE = yes      # Virtual DIP switch configuration
 MOUSEKEY_ENABLE = no        # Mouse keys
 EXTRAKEY_ENABLE = no	    # Audio control and System control

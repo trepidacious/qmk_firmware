@@ -13,7 +13,7 @@ void matrix_init_kb(void) {
 void matrix_scan_kb(void) {
 	// put your looping keyboard code here
 	// runs every cycle (a lot)
-    palTogglePad(GPIOD, GPIOD_LED3);       /* Orange.  */
+    // palTogglePad(GPIOD, GPIOD_LED3);       /* Orange.  */
 
     // Make the scan thread allow context switches (in case it has no sleeps etc.)
     chThdYield();
