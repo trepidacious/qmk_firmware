@@ -8,15 +8,15 @@
 MCU_FAMILY = STM32
 MCU_SERIES = STM32F4xx
 # linker script to use
-# it should exist either in <chibios>/os/common/ports/ARMCMx/compilers/GCC/ld/
+# it should exist either in <chibios>/os/common/startup/ARMCMx/compilers/GCC/ld
 #  or <this_dir>/ld/
-MCU_LDSCRIPT = STM32F407xG
+MCU_LDSCRIPT = STM32F405xG
 # startup code to use
-# is should exist in <chibios>/os/common/ports/ARMCMx/compilers/GCC/mk/
+# is should exist in <chibios>/os/common/startup/ARMCMx/compilers/GCC/mk/
 MCU_STARTUP = stm32f4xx
 # it should exist either in <chibios>/os/hal/boards/
 #  or <this_dir>/boards
-BOARD = ST_STM32F4_DISCOVERY
+BOARD = ADAFRUIT_FEATHER_EXPRESS
 # Cortex version
 # Teensy LC is cortex-m0; Teensy 3.x are cortex-m4
 MCU  = cortex-m4

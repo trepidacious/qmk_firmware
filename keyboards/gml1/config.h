@@ -39,10 +39,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define MATRIX_ROWS 2
 #define MATRIX_COLS 1
 
-/* One direct connection on A0 */
+/* Direct connections on PC6 and PC7, which are D6 and D5 */
 #define DIRECT_PINS { \
-    {PAL_LINE(GPIOA, 3)}, \
-    {PAL_LINE(GPIOA, 2)} \
+    {PAL_LINE(GPIOC, 6)}, \
+    {PAL_LINE(GPIOC, 7)} \
 }
 
 //LEDS A6, RGB B15

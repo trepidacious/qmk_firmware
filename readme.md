@@ -21,6 +21,12 @@ Development of GML keyboards.
 5. To flash with openocd, use the `.elf` file in `.build` dir in root of project, with `openocd -f ~/Documents/GitHub/brew/share/openocd/scripts/board/stm32f4discovery.cfg -c "program .build/gml1_default.elf verify reset exit"`
 6. Update `.vscode/c_cpp_properies.json` with your brew installation path if necessary.
 
+If you make changes to a submodule, e/g/ `lib/chibios`, you can revert these when finished with:
+```bash
+git submodule deinit -f .
+git submodule update --init
+```
+
 # Quantum Mechanical Keyboard Firmware
 
 [![Current Version](https://img.shields.io/github/tag/qmk/qmk_firmware.svg)](https://github.com/qmk/qmk_firmware/tags)
