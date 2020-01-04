@@ -1,0 +1,15 @@
+sourceRoot: ../../templates/stm32f4xx
+outputRoot: ..
+dataRoot: .
+
+freemarkerLinks: {
+    lib: ../../template_libs
+}
+
+data : {
+  doc1:xml (
+    board.chcfg
+    {
+    }
+  )
+}
