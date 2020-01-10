@@ -68,4 +68,5 @@ CUSTOM_MATRIX = no # Custom matrix file
 
 DEFAULT_FOLDER = gml1
 
+SPLIT_KEYBOARD = yes
 SPLIT_TRANSPORT = custom
