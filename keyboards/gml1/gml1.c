@@ -31,18 +31,24 @@ void matrix_scan_kb(void) {
 bool is_keyboard_master(void) {
     // TODO call this instead
     // return is_keyboard_left();
+
     setPinInput(SPLIT_HAND_PIN);
     bool master = readPin(SPLIT_HAND_PIN);
+
+    // setPinOutput(LINE_D13);
+    // writePin(LINE_D13, master);
 
     return master;
 }
 
 void transport_master_init(void) {
+    // Master has LED on
     setPinOutput(LINE_D13);
     writePin(LINE_D13, 1);
 }
 
 void transport_slave_init(void){
+    // Slave has LED off
     setPinOutput(LINE_D13);
     writePin(LINE_D13, 0);
 }

@@ -55,7 +55,7 @@ CONSOLE_ENABLE = no         # Console for debug
 COMMAND_ENABLE = no         # Commands for debug and configuration
 NKRO_ENABLE = no            # USB Nkey Rollover
 
-RGBLIGHT_ENABLE = yes
+# RGBLIGHT_ENABLE = yes
 
 # NO_USB_STARTUP_CHECK = no   # Wait for USB before startup
 # WAIT_FOR_USB = no
