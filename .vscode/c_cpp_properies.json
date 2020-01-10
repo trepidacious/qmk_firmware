@@ -7,7 +7,8 @@
                 "/usr/local/include",
                 "/Users/rebeam/Documents/GitHub/brew/include",
 
-                "${workspaceFolder}"
+                "${workspaceFolder}",
+                "${workspaceFolder}/keyboards/gml1/boards/ADAFRUIT_FEATHER_EXPRESS"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",

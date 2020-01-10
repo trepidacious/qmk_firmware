@@ -55,6 +55,8 @@ CONSOLE_ENABLE = no         # Console for debug
 COMMAND_ENABLE = no         # Commands for debug and configuration
 NKRO_ENABLE = no            # USB Nkey Rollover
 
+RGBLIGHT_ENABLE = yes
+
 # NO_USB_STARTUP_CHECK = no   # Wait for USB before startup
 # WAIT_FOR_USB = no
 
@@ -65,3 +67,5 @@ LINK_TIME_OPTIMIZATION_ENABLE = no
 CUSTOM_MATRIX = no # Custom matrix file
 
 DEFAULT_FOLDER = gml1
+
+SPLIT_TRANSPORT = custom

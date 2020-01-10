@@ -27,6 +27,11 @@ git submodule deinit -f .
 git submodule update --init
 ```
 
+To flash two boards with dfu, distinguish by serial - find this with `dfu-util --list` and then something like 
+```
+dfu-util -a 0 -S 207F36A9424D --dfuse-address 0x08000000 -D .build/gml1_default.bin; dfu-util -a 0 -S 2073368F424D --dfuse-address 0x08000000 -D .build/gml1_default.bin
+```
+
 # Quantum Mechanical Keyboard Firmware
 
 [![Current Version](https://img.shields.io/github/tag/qmk/qmk_firmware.svg)](https://github.com/qmk/qmk_firmware/tags)

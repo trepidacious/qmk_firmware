@@ -45,11 +45,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {PAL_LINE(GPIOC, 7)} \
 }
 
-//LEDS A6, RGB B15
-
 /* define if matrix has ghost */
 //#define MATRIX_HAS_GHOST
-
 
 /* Set 0 if debouncing isn't needed */
 #define DEBOUNCE    5
@@ -58,7 +55,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define LOCKING_SUPPORT_ENABLE
 /* Locking resynchronize hack */
 #define LOCKING_RESYNC_ENABLE
-
 
 /*
  * Feature disable options
@@ -78,3 +74,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //#define NO_ACTION_MACRO
 //#define NO_ACTION_FUNCTION
 
+// #ifdef RGBLIGHT_ENABLE
+#define RGB_DI_PIN LINE_D8_NEOPIX
+#define RGBLED_NUM 1
+#define RGBLIGHT_EFFECT_RAINBOW_SWIRL
+// #endif
+
+#define SPLIT_HAND_PIN LINE_D12
