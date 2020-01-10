@@ -25,10 +25,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 };
 
 
-const uint16_t fn_actions[] = {
-};
+// const uint16_t fn_actions[] = {
+// };
 
-void keyboard_post_init_user(void) {
-    rgblight_enable_noeeprom();
-    rgblight_mode_noeeprom(RGBLIGHT_MODE_RAINBOW_SWIRL);
-}
+// void keyboard_post_init_user(void) {
+//     rgblight_enable_noeeprom();
+//     rgblight_mode_noeeprom(RGBLIGHT_MODE_RAINBOW_SWIRL);
+// }
