@@ -41,13 +41,30 @@ bool is_keyboard_master(void) {
     return master;
 }
 
+/**
+ * Configure uart for split-keyboard comms
+ */
+void gml1_init_uart(void) {
+    // Default settings are fine - set speed in halconf.h
+    sdStart(&SD3, NULL);
+    // USART3 is AF7 on these pins
+    palSetPadMode(GPIOB, GPIOB_TX_D1, PAL_MODE_ALTERNATE(7));
+    palSetPadMode(GPIOB, GPIOB_RX_D0, PAL_MODE_ALTERNATE(7));
+}
+
 void transport_master_init(void) {
+
+    gml1_init_uart();
+
     // Master has LED on
     setPinOutput(LINE_D13);
     writePin(LINE_D13, 1);
 }
 
 void transport_slave_init(void){
+
+    gml1_init_uart();
+
     // Slave has LED off
     setPinOutput(LINE_D13);
     writePin(LINE_D13, 0);
