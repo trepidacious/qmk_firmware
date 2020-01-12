@@ -15,5 +15,5 @@ The transport functions work slightly differently, they are both called once per
 
 So essentially the master is asked to perform a transaction once per scan, synchronously. The slave is given the opportunity to see the matrix once per scan, but performs its comms asynchronously in response to the master initiating a transaction. The slave uses an interrupt so needs no synchronisation (assuming matrix scanning doesn't use interrupts), but in a ChibiOS version we might want to use a thread for the slave, polling for data received and then responding, and would need to lock on updating the slave copy of the matrix.
 
-The split code assumes that `MATRIX_ROWS` in `config.h` is the total number of rows between the two halves, i.e. if your split keyboard has 4 rows in each half, then use `MATRIX_ROWS=8`.
+The split code assumes that `MATRIX_ROWS` in `config.h` is the total number of rows between the two halves, i.e. if your split keyboard has 4 rows in each half, then use `MATRIX_ROWS=8`. Weirdly, the slave half of the keyboard is the first half in the `matrix` parameter of `transport_master` - i.e. rows 0 to n-1 are slave, and rows n to 2*n-1 are the master. On the slave, the first rows of `matrix` contain the actual state of the buttons attached to the slave - these are the ones to send to the master.
 
