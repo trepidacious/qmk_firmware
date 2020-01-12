@@ -2,8 +2,22 @@
 
 #include "ch.h"
 #include "hal.h"
+#include <string.h>
 
-volatile uint8_t button = 0;
+// Each hand (master and slave) has half the rows of the matrix
+#define ROWS_PER_HAND (MATRIX_ROWS / 2)
+#define SMATRIX_SIZE (ROWS_PER_HAND * sizeof(matrix_row_t))
+
+enum serial_transaction_id {
+    GET_SLAVE_MATRIX = 0,
+#    if defined(RGBLIGHT_ENABLE) && defined(RGBLIGHT_SPLIT)
+    PUT_RGBLIGHT,
+#    endif
+};
+
+// Copy of the matric on the slave, for SlaveThread to send when queried
+static matrix_row_t smatrix[ROWS_PER_HAND];
+// static mutex_t smatrix_mtx;
 
 /*
  * This thread runs on the slave and responds to transactions initiated
@@ -14,13 +28,11 @@ static THD_FUNCTION(SlaveThread, arg) {
   (void)arg;
   chRegSetThreadName("slave_transport");
   while (true) {
-    // writePin(LINE_D13, 0);
-    // chThdSleepMilliseconds(500);
-    // writePin(LINE_D13, 1);
-    // chThdSleepMilliseconds(500);
-    uint8_t command = sdGet(&SD3);
-    if (command == 1) {
-        sdPut(&SD3, button);
+    enum serial_transaction_id tid = sdGet(&SD3);
+    if (tid == GET_SLAVE_MATRIX) {
+        // chMtxLock(&smatrix_mtx);
+        sdWrite(&SD3, smatrix, SMATRIX_SIZE);
+        // chMtxUnlock(&smatrix_mtx);
     }
   }
 }
@@ -35,7 +47,6 @@ void matrix_init_kb(void) {
 void matrix_scan_kb(void) {
 	// put your looping keyboard code here
 	// runs every cycle (a lot)
-    // palTogglePad(GPIOD, GPIOD_LED3);       /* Orange.  */
 
     // Make the scan thread allow context switches (in case it has no sleeps etc.)
     chThdYield();
@@ -44,14 +55,9 @@ void matrix_scan_kb(void) {
 }
 
 bool is_keyboard_master(void) {
-    // TODO call this instead
-    // return is_keyboard_left();
-
+    // TODO Can we find out whether we are left or right from qmk?
     setPinInput(SPLIT_HAND_PIN);
     bool master = readPin(SPLIT_HAND_PIN);
-
-    // setPinOutput(LINE_D13);
-    // writePin(LINE_D13, master);
 
     return master;
 }
@@ -75,8 +81,6 @@ void transport_master_init(void) {
     setPinOutput(LINE_D13);
     writePin(LINE_D13, 1);
 
-    // palSetPadMode(GPIOB, GPIOB_D10, PAL_MODE_INPUT_PULLUP);
-
 }
 
 void transport_slave_init(void){
@@ -88,26 +92,24 @@ void transport_slave_init(void){
     writePin(LINE_D13, 0);
 
     // Start transport thread
-    chThdCreateStatic(waSlaveThread, sizeof(waSlaveThread), NORMALPRIO, SlaveThread, NULL);
+    chThdCreateStatic(waSlaveThread, sizeof(waSlaveThread), HIGHPRIO - 10, SlaveThread, NULL);
 }
 
-// returns false if valid data not received from slave
 bool transport_master(matrix_row_t matrix[]) {
-    // matrix[0] = !readPin(LINE_D10);
-
     // Read data from slave and set matrix
-    sdPut(&SD3, 1);
-    msg_t slave_button = sdGetTimeout(&SD3, MS2ST(5));
-    if (slave_button < 0) {
+    sdPut(&SD3, GET_SLAVE_MATRIX);
+    msg_t read_result = sdReadTimeout(&SD3, smatrix, SMATRIX_SIZE, MS2ST(5));
+    if (read_result < 0) {
         // Error, e.g. timeout
         return false;
     } else {
-        matrix[0] = slave_button;
+        memcpy(matrix, smatrix, SMATRIX_SIZE);
         return true;
     }
 }
 
 void transport_slave(matrix_row_t matrix[]) {
-    writePin(LINE_D13, matrix[0]);
-    button = matrix[0];
+    // chMtxLock(&smatrix_mtx);
+    memcpy(smatrix, matrix, SMATRIX_SIZE);
+    // chMtxUnlock(&smatrix_mtx);
 }
