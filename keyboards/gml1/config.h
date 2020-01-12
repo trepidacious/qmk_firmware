@@ -27,23 +27,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define PRODUCT GML1
 #define DESCRIPTION Great Mountain Lizard 1
 
-// /* key matrix size */
-// #define MATRIX_ROWS 4
-// #define MATRIX_COLS 4
-
-// #define MATRIX_COL_PINS { B7, B8, B9, B10 }
-// #define MATRIX_ROW_PINS { B3, B4, B5, B6 }
-// #define DIODE_DIRECTION COL2ROW
-
 /* key matrix size */
+// We are a split keyboard, so we have one set of rows on each half,
+// for a total of 2
 #define MATRIX_ROWS 2
+// Single column - each half is a 1x1 matrix
 #define MATRIX_COLS 1
 
-/* Direct connections on PC6 and PC7, which are D6 and D5 */
-#define DIRECT_PINS { \
-    {PAL_LINE(GPIOC, 6)}, \
-    {PAL_LINE(GPIOC, 7)} \
-}
+#define MATRIX_COL_PINS { LINE_D5 }
+#define MATRIX_ROW_PINS { LINE_D6 }
+#define DIODE_DIRECTION COL2ROW
+
+// /* key matrix size */
+// #define MATRIX_ROWS 2
+// #define MATRIX_COLS 1
+
+// /* Direct connections on PC6 and PC7, which are D6 and D5 */
+// #define DIRECT_PINS { {PAL_LINE(GPIOC, 6)}, {PAL_LINE(GPIOC, 7)} }
 
 /* define if matrix has ghost */
 //#define MATRIX_HAS_GHOST
