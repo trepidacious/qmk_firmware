@@ -1,12 +1,5 @@
 #include "gml1.h"
 
-// #include "split_common/split_util.h"
-// #include "matrix.h"
-// #include "keyboard.h"
-// #include "config.h"
-// #include "timer.h"
-// #include "quantum.h"
-
 #include "ch.h"
 #include "hal.h"
 
@@ -104,11 +97,14 @@ bool transport_master(matrix_row_t matrix[]) {
 
     // Read data from slave and set matrix
     sdPut(&SD3, 1);
-    // TODO respond to timeout
-    uint8_t slave_button = sdGetTimeout(&SD3, MS2ST(5));
-    matrix[0] = slave_button;
-
-    return true;
+    msg_t slave_button = sdGetTimeout(&SD3, MS2ST(5));
+    if (slave_button < 0) {
+        // Error, e.g. timeout
+        return false;
+    } else {
+        matrix[0] = slave_button;
+        return true;
+    }
 }
 
 void transport_slave(matrix_row_t matrix[]) {
