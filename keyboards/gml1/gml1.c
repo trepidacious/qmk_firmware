@@ -58,6 +58,7 @@ void matrix_scan_kb(void) {
 
     // Make the scan thread allow context switches (in case it has no sleeps etc.)
     chThdYield();
+    // chThdSleepMilliseconds(1);
 
 	matrix_scan_user();
 }
@@ -115,11 +116,15 @@ void transport_slave_init(void){
 }
 
 bool transport_master(matrix_row_t matrix[]) {
+
+    // Clear the buffer
+    while(sdGetTimeout(&SD3, TIME_IMMEDIATE) != MSG_TIMEOUT);
+
     // Read data from slave and set matrix
     sdPut(&SD3, GET_SLAVE_MATRIX);
     // Read back and discard what we just wrote
     sdGet(&SD3);
-    msg_t read_result = sdReadTimeout(&SD3, smatrix, SMATRIX_SIZE, MS2ST(5));
+    msg_t read_result = sdReadTimeout(&SD3, smatrix, SMATRIX_SIZE, MS2ST(200));
     if (read_result < 0) {
         // Error, e.g. timeout
         return false;
