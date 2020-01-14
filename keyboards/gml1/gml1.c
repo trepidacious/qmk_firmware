@@ -19,6 +19,13 @@ enum serial_transaction_id {
 static matrix_row_t smatrix[ROWS_PER_HAND];
 // static mutex_t smatrix_mtx;
 
+static SerialConfig serial_cfg = {
+    1000000,
+    0,
+    0,
+    USART_CR3_HDSEL
+};
+
 /*
  * This thread runs on the slave and responds to transactions initiated
  * by the master
@@ -31,6 +38,7 @@ static THD_FUNCTION(SlaveThread, arg) {
     enum serial_transaction_id tid = sdGet(&SD3);
     if (tid == GET_SLAVE_MATRIX) {
         // chMtxLock(&smatrix_mtx);
+        chThdSleepMilliseconds(1);
         sdWrite(&SD3, smatrix, SMATRIX_SIZE);
         // chMtxUnlock(&smatrix_mtx);
     }
@@ -66,11 +74,21 @@ bool is_keyboard_master(void) {
  * Configure uart for split-keyboard comms
  */
 void gml1_init_uart(void) {
-    // Default settings are fine - set speed in halconf.h
-    sdStart(&SD3, NULL);
-    // USART3 is AF7 on these pins
-    palSetPadMode(GPIOB, GPIOB_TX_D1, PAL_MODE_ALTERNATE(7));
-    palSetPadMode(GPIOB, GPIOB_RX_D0, PAL_MODE_ALTERNATE(7));
+    // // Default settings are fine - set speed in halconf.h
+    // sdStart(&SD3, NULL);
+    // // USART3 is AF7 on these pins
+    // palSetPadMode(GPIOB, GPIOB_TX_D1, PAL_MODE_ALTERNATE(7));
+    // palSetPadMode(GPIOB, GPIOB_RX_D0, PAL_MODE_ALTERNATE(7));
+
+    // Configure in half-duplex
+    sdStart(&SD3, &serial_cfg);
+
+    // USART3 is AF7 on TX, which must be a open drain when not controlled
+    // by peripheral
+    const uint32_t modeTx = PAL_MODE_ALTERNATE(7) | PAL_STM32_OTYPE_OPENDRAIN
+      | PAL_MODE_INPUT_PULLUP | PAL_STM32_OSPEED_HIGHEST | PAL_STM32_MODE_ALTERNATE;
+
+    palSetPadMode(GPIOB, GPIOB_TX_D1, modeTx);
 }
 
 void transport_master_init(void) {
@@ -98,6 +116,8 @@ void transport_slave_init(void){
 bool transport_master(matrix_row_t matrix[]) {
     // Read data from slave and set matrix
     sdPut(&SD3, GET_SLAVE_MATRIX);
+    // Read back and discard what we just wrote
+    sdGet(&SD3);
     msg_t read_result = sdReadTimeout(&SD3, smatrix, SMATRIX_SIZE, MS2ST(5));
     if (read_result < 0) {
         // Error, e.g. timeout
