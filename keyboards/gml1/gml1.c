@@ -80,7 +80,8 @@ void gml1_init_uart(void) {
     // palSetPadMode(GPIOB, GPIOB_TX_D1, PAL_MODE_ALTERNATE(7));
     // palSetPadMode(GPIOB, GPIOB_RX_D0, PAL_MODE_ALTERNATE(7));
 
-    // Configure in half-duplex
+    // Configure in half-duplex - note this needs a strong pull-up on
+    // TX pin to work at higher speeds.
     sdStart(&SD3, &serial_cfg);
 
     // USART3 is AF7 on TX, which must be a open drain when not controlled
