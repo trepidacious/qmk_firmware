@@ -74,11 +74,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //#define NO_ACTION_MACRO
 //#define NO_ACTION_FUNCTION
 
-// #ifdef RGBLIGHT_ENABLE
+#ifdef RGBLIGHT_ENABLE
 #define RGB_DI_PIN LINE_D8_NEOPIX
 #define RGBLED_NUM 1
 #define RGBLIGHT_EFFECT_RAINBOW_SWIRL
-// #endif
+#endif
 
 #define SPLIT_HAND_PIN LINE_D12
 
