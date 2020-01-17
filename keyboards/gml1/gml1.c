@@ -91,7 +91,7 @@ bool transport_master(matrix_row_t matrix[]) {
 
     } else {
         memcpy(matrix, smatrix, SMATRIX_SIZE);
-        // palToggleLine(LINE_D13);
+        palToggleLine(LINE_D13);
         return true;
     }
 }

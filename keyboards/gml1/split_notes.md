@@ -22,3 +22,5 @@ So essentially the master is asked to perform a transaction once per scan, synch
 The split code assumes that `MATRIX_ROWS` in `config.h` is the total number of rows between the two halves, i.e. if your split keyboard has 4 rows in each half, then use `MATRIX_ROWS=8`. 
 
 Main thread runs `tmk_core/protocol/chibios/main.c`, which just hammers keyboard_task.
+
+Hid_listen from https://github.com/PaulStoffregen/hid_listen seems to work - need to specify OS by changing makefile (or specifying on command line?).
