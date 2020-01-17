@@ -4,6 +4,33 @@
 #include "hal.h"
 #include <string.h>
 
+void matrix_init_kb(void) {
+	// put your keyboard start-up code here
+	// runs once when the firmware starts up
+
+	matrix_init_user();
+}
+
+void matrix_scan_kb(void) {
+	// put your looping keyboard code here
+	// runs every cycle (a lot)
+
+    // Make the scan thread allow context switches (in case it has no sleeps etc.)
+    chThdYield();
+    // chThdSleepMilliseconds(1);
+
+	matrix_scan_user();
+}
+
+bool is_keyboard_master(void) {
+    // TODO Can we find out whether we are left or right from qmk?
+    setPinInput(SPLIT_HAND_PIN);
+    bool master = readPin(SPLIT_HAND_PIN);
+
+    return master;
+}
+
+
 // Each hand (master and slave) has half the rows of the matrix
 #define ROWS_PER_HAND (MATRIX_ROWS / 2)
 #define SMATRIX_SIZE (ROWS_PER_HAND * sizeof(matrix_row_t))
@@ -38,38 +65,43 @@ static THD_FUNCTION(SlaveThread, arg) {
     enum serial_transaction_id tid = sdGet(&SD3);
     if (tid == GET_SLAVE_MATRIX) {
         // chMtxLock(&smatrix_mtx);
-        chThdSleepMilliseconds(1);
         sdWrite(&SD3, smatrix, SMATRIX_SIZE);
         // chMtxUnlock(&smatrix_mtx);
+
+        // TODO can we avoid the need to read back our own data?
+        // Read back what we wrote...
+        sdRead(&SD3, smatrix, SMATRIX_SIZE);
     }
   }
 }
 
-void matrix_init_kb(void) {
-	// put your keyboard start-up code here
-	// runs once when the firmware starts up
+bool transport_master(matrix_row_t matrix[]) {
 
-	matrix_init_user();
+    // Clear the buffer
+    while(sdGetTimeout(&SD3, TIME_IMMEDIATE) != MSG_TIMEOUT);
+
+    // Read data from slave and set matrix
+    sdPut(&SD3, GET_SLAVE_MATRIX);
+    // Read back and discard what we just wrote
+    sdGet(&SD3);
+    msg_t read_result = sdReadTimeout(&SD3, smatrix, SMATRIX_SIZE, MS2ST(5));
+    if (read_result < 0) {
+        // Error, e.g. timeout
+        return false;
+
+    } else {
+        memcpy(matrix, smatrix, SMATRIX_SIZE);
+        // palToggleLine(LINE_D13);
+        return true;
+    }
 }
 
-void matrix_scan_kb(void) {
-	// put your looping keyboard code here
-	// runs every cycle (a lot)
-
-    // Make the scan thread allow context switches (in case it has no sleeps etc.)
-    chThdYield();
-    // chThdSleepMilliseconds(1);
-
-	matrix_scan_user();
+void transport_slave(matrix_row_t matrix[]) {
+    // chMtxLock(&smatrix_mtx);
+    memcpy(smatrix, matrix, SMATRIX_SIZE);
+    // chMtxUnlock(&smatrix_mtx);
 }
 
-bool is_keyboard_master(void) {
-    // TODO Can we find out whether we are left or right from qmk?
-    setPinInput(SPLIT_HAND_PIN);
-    bool master = readPin(SPLIT_HAND_PIN);
-
-    return master;
-}
 
 /**
  * Configure uart for split-keyboard comms
@@ -113,29 +145,4 @@ void transport_slave_init(void){
 
     // Start transport thread
     chThdCreateStatic(waSlaveThread, sizeof(waSlaveThread), HIGHPRIO - 10, SlaveThread, NULL);
-}
-
-bool transport_master(matrix_row_t matrix[]) {
-
-    // Clear the buffer
-    while(sdGetTimeout(&SD3, TIME_IMMEDIATE) != MSG_TIMEOUT);
-
-    // Read data from slave and set matrix
-    sdPut(&SD3, GET_SLAVE_MATRIX);
-    // Read back and discard what we just wrote
-    sdGet(&SD3);
-    msg_t read_result = sdReadTimeout(&SD3, smatrix, SMATRIX_SIZE, MS2ST(200));
-    if (read_result < 0) {
-        // Error, e.g. timeout
-        return false;
-    } else {
-        memcpy(matrix, smatrix, SMATRIX_SIZE);
-        return true;
-    }
-}
-
-void transport_slave(matrix_row_t matrix[]) {
-    // chMtxLock(&smatrix_mtx);
-    memcpy(smatrix, matrix, SMATRIX_SIZE);
-    // chMtxUnlock(&smatrix_mtx);
 }
