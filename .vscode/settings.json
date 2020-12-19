@@ -18,5 +18,8 @@
       "__string": "c",
       "cstring": "c",
       "memory": "c"
+    },
+    "files.watcherExclude": {
+      "**/target": true
     }
 }

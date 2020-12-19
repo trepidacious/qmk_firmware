@@ -65,9 +65,13 @@ NO_USB_STARTUP_CHECK = yes
 # Disable for ARM
 LINK_TIME_OPTIMIZATION_ENABLE = no
 
+
 CUSTOM_MATRIX = no # No custom matrix file
 
 DEFAULT_FOLDER = gml1
+
+SPLIT_KEYBOARD = yes
+SPLIT_TRANSPORT = custom
 
 # Debugging
 CONSOLE_ENABLE = yes

@@ -28,12 +28,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define DESCRIPTION Great Mountain Lizard 1
 
 /* key matrix size */
-#define MATRIX_ROWS 4
-#define MATRIX_COLS 6
+// We are a split keyboard, so we have one set of rows on each half,
+// for a total of 2
+#define MATRIX_ROWS 2
+// Single column - each half is a 1x1 matrix
+#define MATRIX_COLS 1
 
-#define MATRIX_COL_PINS { LINE_A0, LINE_A1, LINE_A2, LINE_A3, LINE_A4, LINE_A5 }
-#define MATRIX_ROW_PINS { LINE_D9, LINE_D10, LINE_D11, LINE_D12 }
-
+#define MATRIX_COL_PINS { LINE_D5 }
+#define MATRIX_ROW_PINS { LINE_D6 }
 #define DIODE_DIRECTION COL2ROW
 
 // /* key matrix size */
@@ -47,12 +49,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //#define MATRIX_HAS_GHOST
 
 /* Set 0 if debouncing isn't needed */
-// #define DEBOUNCE    5
+#define DEBOUNCE    5
 
 /* Mechanical locking support. Use KC_LCAP, KC_LNUM or KC_LSCR instead in keymap */
-// #define LOCKING_SUPPORT_ENABLE
+#define LOCKING_SUPPORT_ENABLE
 /* Locking resynchronize hack */
-// #define LOCKING_RESYNC_ENABLE
+#define LOCKING_RESYNC_ENABLE
 
 /*
  * Feature disable options
@@ -78,6 +80,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define RGBLIGHT_EFFECT_RAINBOW_SWIRL
 #endif
 
-// #define SPLIT_HAND_PIN LINE_D12
+#define SPLIT_HAND_PIN LINE_D12
 
 #define DEBUG_MATRIX_SCAN_RATE
