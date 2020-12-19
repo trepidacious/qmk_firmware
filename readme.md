@@ -1,5 +1,11 @@
 # Great Mountain Lizard
 
+Note that on new GCC versions you will need to make the following changes to `chibios/os/common/ext/CMSIS/include/cmsis_gcc.h` - lines 164 and 190, remove the characters `"sp"` on each line, e.g.:
+
+```c
+  __ASM volatile ("MSR psp, %0\n" : : "r" (topOfProcStack) : );
+```
+
 Development of GML keyboards.
 1. If you clone this without cloning submodules (e.g. using Github Desktop) then you need to run `make git-submodule` before making anything else.
 2. To pull from upstream, see [Syncing a fork](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/syncing-a-fork). If Github desktop was used to clone, upstream is already configured. Essentially, use:
