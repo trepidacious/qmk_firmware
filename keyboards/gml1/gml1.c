@@ -1,11 +1,74 @@
 #include "gml1.h"
+#include QMK_KEYBOARD_H
+#include "i2c_master.h"
 
 // #include "ch.h"
 // #include "hal.h"
 // #include <string.h>
 
+#define ALPHANUM_ADDRESS (0x70 << 1)
+// TODO assume timeout in ms?
+#define ALPHANUM_TIMEOUT 50		
+// Maximum is 15
+#define ALPHANUM_DEFAULT_BRIGHTNESS 8
+
+#define HT16K33_BLINK_CMD 0x80       ///< I2C register for BLINK setting
+#define HT16K33_BLINK_DISPLAYON 0x01 ///< I2C value for steady on
+#define HT16K33_BLINK_OFF 0          ///< I2C value for steady off
+#define HT16K33_BLINK_2HZ 1          ///< I2C value for 2 Hz blink
+#define HT16K33_BLINK_1HZ 2          ///< I2C value for 1 Hz blink
+#define HT16K33_BLINK_HALFHZ 3       ///< I2C value for 0.5 Hz blink
+
+#define HT16K33_CMD_BRIGHTNESS 0xE0 ///< I2C register for BRIGHTNESS setting
+#define HT16K33_OSC_ON 0x21
+
+static uint8_t alpha_data = 0;
+
+static void start(void) {
+	i2c_start(ALPHANUM_ADDRESS);
+}
+
+static void write(uint8_t a) {
+	alpha_data = a;
+	i2c_transmit(ALPHANUM_ADDRESS, &alpha_data, 1, ALPHANUM_TIMEOUT);
+}
+
+static void stop(void) {
+	i2c_stop();
+}
+
+static void set_brightness(uint8_t b) {
+  if (b > 15)
+    b = 15;
+  start();
+  write(HT16K33_CMD_BRIGHTNESS | b);
+  stop();
+}
+
+
+
+static void set_blink_rate(uint8_t b) {
+	start();
+	if (b > 3) b = 0; // turn off if not sure
+
+	write(HT16K33_BLINK_CMD | HT16K33_BLINK_DISPLAYON | (b << 1));
+	stop();
+}
+
+static void init(void) {
+	start();
+	write(HT16K33_OSC_ON);
+	stop();
+}
+
 void matrix_init_kb(void) {
 	matrix_init_user();
+
+	i2c_init();
+	init();
+	set_blink_rate(HT16K33_BLINK_OFF);
+	set_brightness(ALPHANUM_DEFAULT_BRIGHTNESS);
+
 }
 
 void matrix_scan_kb(void) {

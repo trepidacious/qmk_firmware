@@ -81,3 +81,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // #define SPLIT_HAND_PIN LINE_D12
 
 #define DEBUG_MATRIX_SCAN_RATE
+
+// The bank of pins (GPIOA, GPIOB, GPIOC) to use for SCL
+#define I2C1_SCL_BANK GPIOB
+
+// The bank of pins (GPIOA, GPIOB, GPIOC) to use for SDA
+#define I2C1_SDA_BANK GPIOB
+
+// The pin number for the SCL pin (0-15)
+#define I2C1_SCL 6
+
+// The pin number for the SCL pin (0-15)
+#define I2C1_SDA 7
+

@@ -56,3 +56,6 @@ LINK_TIME_OPTIMIZATION_ENABLE = no
 CUSTOM_MATRIX = no # No custom matrix file
 
 DEFAULT_FOLDER = gml1
+
+# We don't use any features that use i2c so we need to add it ourselves
+SRC += i2c_master.c
