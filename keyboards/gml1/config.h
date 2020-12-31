@@ -31,7 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define MATRIX_ROWS 8
 #define MATRIX_COLS 6
 
-#define MATRIX_ROW_PINS { LINE_D9, LINE_D10, LINE_D11, LINE_D12, LINE_RX_D0, LINE_D13, LINE_D6, LINE_D5 }
+#define MATRIX_ROW_PINS { LINE_D10, LINE_D11, LINE_D12, LINE_D13, LINE_D9, LINE_D6, LINE_D5, LINE_RX_D0 }
 #define MATRIX_COL_PINS { LINE_A0, LINE_A1, LINE_A2, LINE_A3, LINE_A4, LINE_A5 }
 
 #define DIODE_DIRECTION COL2ROW
