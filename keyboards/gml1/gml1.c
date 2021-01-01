@@ -9,8 +9,10 @@
 #define ALPHANUM_ADDRESS (0x70 << 1)
 // TODO assume timeout in ms?
 #define ALPHANUM_TIMEOUT 50		
-// Maximum is 15
-#define ALPHANUM_DEFAULT_BRIGHTNESS 1
+
+#define ALPHANUM_DEFAULT_BRIGHTNESS 4
+#define ALPHANUM_MAX_BRIGHTNESS 15
+#define ALPHANUM_MIN_BRIGHTNESS 0
 
 #define HT16K33_BLINK_CMD 0x80       ///< I2C register for BLINK setting
 #define HT16K33_BLINK_DISPLAYON 0x01 ///< I2C value for steady on
@@ -25,6 +27,8 @@
 static uint8_t alpha_data[20];
 
 static uint16_t displaybuffer[8]; ///< Raw display data
+
+static uint8_t brightness = ALPHANUM_DEFAULT_BRIGHTNESS;
 
 static const uint16_t alphafonttable[] PROGMEM = {
 
@@ -207,6 +211,20 @@ void clear(void) {
   }
 }
 
+static void brighter(void) {
+	if (brightness < ALPHANUM_MAX_BRIGHTNESS) { 
+		brightness++;
+		set_brightness(brightness);
+	}
+}
+
+static void dimmer(void) {
+	if (brightness > ALPHANUM_MIN_BRIGHTNESS) {
+		brightness--;
+		set_brightness(brightness);
+	}
+}
+
 static void init(void) {
 	start();
 	write(HT16K33_OSC_ON);
@@ -222,13 +240,74 @@ void matrix_init_kb(void) {
 	// Clear memory, may not be empty
 	clear();
 	write_digit_ascii(0, 'G', false);
-	write_digit_ascii(1, 'M', false);
+	write_digit_ascii(1, 'm', false);
 	write_digit_ascii(2, 'L', false);
 	write_digit_ascii(3, '1', false);
 	write_display();
 
 	set_blink_rate(HT16K33_BLINK_OFF);
 	set_brightness(ALPHANUM_DEFAULT_BRIGHTNESS);
+}
+
+static bool splash = true;
+
+bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
+
+	process_record_user(keycode, record);
+
+	if (splash) {
+		clear();
+		splash = false;
+	}
+
+    switch (keycode) {
+		case KC_VOLU:
+			if (record->event.pressed){
+				brighter();
+				write_digit_ascii(1, 'B', false);
+				write_digit_ascii(2, '0' + brightness / 10, false);
+				write_digit_ascii(3, '0' + brightness % 10, false);
+				write_display();
+			} 
+			return true;
+		case KC_VOLD:
+			if (record->event.pressed) {
+				dimmer();
+				write_digit_ascii(1, 'B', false);
+				write_digit_ascii(2, '0' + brightness / 10, false);
+				write_digit_ascii(3, '0' + brightness % 10, false);
+				write_display();
+			}
+			return true;
+        default:
+			write_digit_ascii(1, 'G', false);
+			write_digit_ascii(2, 'm', false);
+			write_digit_ascii(3, 'L', false);
+			// uint8_t wpm = get_current_wpm();
+			// write_digit_ascii(1, '0' + wpm / 100, false);
+			// write_digit_ascii(2, '0' + (wpm / 10) % 10, false);
+			// write_digit_ascii(3, '0' + brightness % 10, false);
+			write_display();
+			return true;  // Process all other keycodes normally
+    }
+}
+
+layer_state_t layer_state_set_kb(layer_state_t state) {
+	layer_state_set_user(state);
+
+	switch (get_highest_layer(state)) {
+		case 1:
+			write_digit_ascii(0, '_', false);
+			break;
+		case 2:
+			write_digit_raw(0, 0b1);
+			break;
+		default:
+			write_digit_ascii(0, '-', false);
+	}
+	write_display();
+
+	return state;
 }
 
 void matrix_scan_kb(void) {
