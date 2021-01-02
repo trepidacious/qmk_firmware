@@ -6,7 +6,10 @@
 // #include "hal.h"
 // #include <string.h>
 
+
 #define ALPHANUM_ADDRESS (0x70 << 1)
+#define MATRIX_ADDRESS (0x71 << 1)
+
 // TODO assume timeout in ms?
 #define ALPHANUM_TIMEOUT 50		
 
@@ -24,9 +27,10 @@
 #define HT16K33_CMD_BRIGHTNESS 0xE0 ///< I2C register for BRIGHTNESS setting
 #define HT16K33_OSC_ON 0x21
 
-static uint8_t alpha_data[20];
+static uint8_t i2c_data[20];
 
-static uint16_t displaybuffer[8]; ///< Raw display data
+static uint16_t alpha_display_buffer[8]; ///< Raw display data
+static uint16_t matrix_display_buffer[8]; ///< Raw display data
 
 static uint8_t brightness = ALPHANUM_DEFAULT_BRIGHTNESS;
 
@@ -141,13 +145,13 @@ static const uint16_t alphafonttable[] PROGMEM = {
     0b0011111111111111,
 };
 
-static void start(void) {
-	i2c_start(ALPHANUM_ADDRESS);
+static void start(uint8_t address) {
+	i2c_start(address);
 }
 
-static void write(uint8_t a) {
-	alpha_data[0] = a;
-	i2c_transmit(ALPHANUM_ADDRESS, alpha_data, 1, ALPHANUM_TIMEOUT);
+static void write(uint8_t address, uint8_t a) {
+	i2c_data[0] = a;
+	i2c_transmit(address, i2c_data, 1, ALPHANUM_TIMEOUT);
 }
 
 static void stop(void) {
@@ -157,57 +161,113 @@ static void stop(void) {
 static void set_brightness(uint8_t b) {
   if (b > 15)
     b = 15;
-  start();
-  write(HT16K33_CMD_BRIGHTNESS | b);
+  start(ALPHANUM_ADDRESS);
+  write(ALPHANUM_ADDRESS, HT16K33_CMD_BRIGHTNESS | b);
+  stop();
+  start(MATRIX_ADDRESS);
+  write(MATRIX_ADDRESS, HT16K33_CMD_BRIGHTNESS | b);
   stop();
 }
 
 static void set_blink_rate(uint8_t b) {
-	start();
 	if (b > 3) b = 0; // turn off if not sure
 
-	write(HT16K33_BLINK_CMD | HT16K33_BLINK_DISPLAYON | (b << 1));
+	start(ALPHANUM_ADDRESS);
+	write(ALPHANUM_ADDRESS, HT16K33_BLINK_CMD | HT16K33_BLINK_DISPLAYON | (b << 1));
+	stop();
+
+	start(MATRIX_ADDRESS);
+	write(MATRIX_ADDRESS, HT16K33_BLINK_CMD | HT16K33_BLINK_DISPLAYON | (b << 1));
 	stop();
 }
 
-void write_display(void) {
-
+static void write_display(uint8_t address, uint16_t *display_buffer) {
   
 	// TODO Use one transfer?
-	alpha_data[0] = 0x00; // start at address $00
+	i2c_data[0] = 0x00; // start at address $00
 
 	for (uint8_t i = 0; i < 8; i++) {
-		alpha_data[1 + i * 2] = displaybuffer[i] & 0xFF;
-		alpha_data[1 + i * 2 + 1] = displaybuffer[i] >> 8;
+		i2c_data[1 + i * 2] = display_buffer[i] & 0xFF;
+		i2c_data[1 + i * 2 + 1] = display_buffer[i] >> 8;
 	}
 
-    start();
-	i2c_transmit(ALPHANUM_ADDRESS, alpha_data, 1 + 8 * 2, ALPHANUM_TIMEOUT);
+    start(address);
+	i2c_transmit(address, i2c_data, 1 + 8 * 2, ALPHANUM_TIMEOUT);
   	stop();
 }
 
-void write_digit_raw(uint8_t n, uint16_t bitmask) {
-  displaybuffer[n] = bitmask;
+static void write_digits(void) {
+	write_display(ALPHANUM_ADDRESS, alpha_display_buffer);
 }
 
-void write_digit_ascii(uint8_t n, uint8_t a, bool d) {
+static void write_matrix(void) {
+	write_display(MATRIX_ADDRESS, matrix_display_buffer);
+}
+
+static void write_all(void) {
+	write_digits();
+	write_matrix();
+}
+
+static void write_digit_raw(uint8_t n, uint16_t bitmask) {
+  alpha_display_buffer[n] = bitmask;
+}
+
+static void write_digit_ascii(uint8_t n, uint8_t a, bool d) {
   uint16_t font = pgm_read_word(alphafonttable + a);
 
-  displaybuffer[n] = font;
-
-  /*
-  Serial.print(a, DEC);
-  Serial.print(" / '"); Serial.write(a);
-  Serial.print("' = 0x"); Serial.println(font, HEX);
-  */
+  alpha_display_buffer[n] = font;
 
   if (d)
-    displaybuffer[n] |= (1 << 14);
+    alpha_display_buffer[n] |= (1 << 14);
+}
+
+#ifndef _swap_int16_t
+#define _swap_int16_t(a, b)                                                    \
+  {                                                                            \
+    int16_t t = a;                                                             \
+    a = b;                                                                     \
+    b = t;                                                                     \
+  } ///< 16-bit var swap
+#endif
+
+
+#define ROTATION 3
+
+static void draw_pixel(int16_t x, int16_t y, uint16_t color) {
+
+//   check rotation, move pixel around if necessary
+  switch (ROTATION) {
+  case 2:
+    _swap_int16_t(x, y);
+    x = 16 - x - 1;
+    break;
+  case 3:
+    x = 16 - x - 1;
+    y = 8 - y - 1;
+    break;
+  case 0:
+    _swap_int16_t(x, y);
+    y = 8 - y - 1;
+    break;
+  }
+
+  if ((y < 0) || (y >= 8))
+    return;
+  if ((x < 0) || (x >= 16))
+    return;
+
+  if (color) {
+    matrix_display_buffer[y] |= 1 << x;
+  } else {
+    matrix_display_buffer[y] &= ~(1 << x);
+  }
 }
 
 void clear(void) {
   for (uint8_t i = 0; i < 8; i++) {
-    displaybuffer[i] = 0;
+    alpha_display_buffer[i] = 0;
+	matrix_display_buffer[i] = 0;
   }
 }
 
@@ -225,17 +285,20 @@ static void dimmer(void) {
 	}
 }
 
-static void init(void) {
-	start();
-	write(HT16K33_OSC_ON);
+static void display_init(void) {
+	start(ALPHANUM_ADDRESS);
+	write(ALPHANUM_ADDRESS, HT16K33_OSC_ON);
+	stop();
+	start(MATRIX_ADDRESS);
+	write(MATRIX_ADDRESS, HT16K33_OSC_ON);
 	stop();
 }
 
 void matrix_init_kb(void) {
 	matrix_init_user();
 
-	i2c_init();
-	init();
+	i2c_init(); 
+	display_init();
 
 	// Clear memory, may not be empty
 	clear();
@@ -243,7 +306,23 @@ void matrix_init_kb(void) {
 	write_digit_ascii(1, 'm', false);
 	write_digit_ascii(2, 'L', false);
 	write_digit_ascii(3, '1', false);
-	write_display();
+	draw_pixel(0, 1, true);
+	draw_pixel(1, 2, true);
+	draw_pixel(2, 4, true);
+	draw_pixel(3, 7, true);
+	draw_pixel(4, 1, true);
+	draw_pixel(5, 2, true);
+	draw_pixel(6, 3, true);
+	draw_pixel(7, 4, true);
+	draw_pixel(8, 5, true);
+	draw_pixel(9, 4, true);
+	draw_pixel(10, 3, true);
+	draw_pixel(11, 2, true);
+	draw_pixel(12, 1, true);
+	draw_pixel(13, 4, true);
+	draw_pixel(14, 2, true);
+	draw_pixel(15, 5, true);
+	write_all();
 
 	set_blink_rate(HT16K33_BLINK_OFF);
 	set_brightness(ALPHANUM_DEFAULT_BRIGHTNESS);
@@ -267,7 +346,7 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
 				write_digit_ascii(1, 'B', false);
 				write_digit_ascii(2, '0' + brightness / 10, false);
 				write_digit_ascii(3, '0' + brightness % 10, false);
-				write_display();
+				write_digits();
 			} 
 			return true;
 		case KC_VOLD:
@@ -276,7 +355,7 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
 				write_digit_ascii(1, 'B', false);
 				write_digit_ascii(2, '0' + brightness / 10, false);
 				write_digit_ascii(3, '0' + brightness % 10, false);
-				write_display();
+				write_digits();
 			}
 			return true;
         default:
@@ -287,7 +366,7 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
 			// write_digit_ascii(1, '0' + wpm / 100, false);
 			// write_digit_ascii(2, '0' + (wpm / 10) % 10, false);
 			// write_digit_ascii(3, '0' + brightness % 10, false);
-			write_display();
+			write_digits();
 			return true;  // Process all other keycodes normally
     }
 }
@@ -305,7 +384,7 @@ layer_state_t layer_state_set_kb(layer_state_t state) {
 		default:
 			write_digit_ascii(0, '-', false);
 	}
-	write_display();
+	write_digits();
 
 	return state;
 }
