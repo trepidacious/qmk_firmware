@@ -17,7 +17,8 @@
       "utility": "c",
       "__string": "c",
       "cstring": "c",
-      "memory": "c"
+      "memory": "c",
+      "*.tcc": "c"
     },
     "files.watcherExclude": {
       "**/target": true

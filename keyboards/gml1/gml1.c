@@ -232,35 +232,47 @@ static void write_digit_ascii(uint8_t n, uint8_t a, bool d) {
 #endif
 
 
-#define ROTATION 3
-
 static void draw_pixel(int16_t x, int16_t y, uint16_t color) {
-
-//   check rotation, move pixel around if necessary
-  switch (ROTATION) {
-  case 2:
-    _swap_int16_t(x, y);
-    x = 16 - x - 1;
-    break;
-  case 3:
-    x = 16 - x - 1;
-    y = 8 - y - 1;
-    break;
-  case 0:
-    _swap_int16_t(x, y);
-    y = 8 - y - 1;
-    break;
-  }
 
   if ((y < 0) || (y >= 8))
     return;
   if ((x < 0) || (x >= 16))
     return;
 
-  if (color) {
-    matrix_display_buffer[y] |= 1 << x;
+  // Note for logic - with the wing arranged landscape, so that the USB connector
+  // of the feather would be on the left (hence matching the silkscreen pin labels
+  // at least on the feathers I've seen), we have a left panel and a right panel.
+  // Viewed this way, the matrix_display_buffer is laid out oddly - each unit16_t
+  // in the buffer runs along a pair of columns of the display, bit 0 is at the 
+  // bottom of the left panel, bit 1 is above it, and so on to bit 7 at the top 
+  // of the left panel, then bit 8 is at the bottom of the right panel, and so
+  // on going up through the right panel. The first unit16_t covers the left
+  // most column of each panel, then the next covers the one to the right, and
+  // so on to the 7th unit16_t which covers the rightmost column of each panel.
+  // This means that the layout doesn't have an easy transformation to a direct
+  // mapping of any rotation of the display.
+  // We choose a mapping starting in the top left, with x going right, and y going 
+  // down.
+
+  // Convert to row and column
+  int r;
+  int c;
+
+  // Left panel
+  if (x < 8) {
+    r = x;
+    c = 7 - y;
+
+  // Right panel
   } else {
-    matrix_display_buffer[y] &= ~(1 << x);
+    r = x - 8;
+    c = 15 - y;
+  }
+
+  if (color) {
+    matrix_display_buffer[r] |= 1 << c;
+  } else {
+    matrix_display_buffer[r] &= ~(1 << c);
   }
 }
 
@@ -306,22 +318,53 @@ void matrix_init_kb(void) {
 	write_digit_ascii(1, 'm', false);
 	write_digit_ascii(2, 'L', false);
 	write_digit_ascii(3, '1', false);
+
 	draw_pixel(0, 1, true);
 	draw_pixel(1, 2, true);
 	draw_pixel(2, 4, true);
 	draw_pixel(3, 7, true);
-	draw_pixel(4, 1, true);
-	draw_pixel(5, 2, true);
-	draw_pixel(6, 3, true);
-	draw_pixel(7, 4, true);
-	draw_pixel(8, 5, true);
-	draw_pixel(9, 4, true);
-	draw_pixel(10, 3, true);
-	draw_pixel(11, 2, true);
-	draw_pixel(12, 1, true);
-	draw_pixel(13, 4, true);
-	draw_pixel(14, 2, true);
-	draw_pixel(15, 5, true);
+	draw_pixel(4, 6, true);
+	draw_pixel(5, 5, true);
+	draw_pixel(6, 4, true);
+	draw_pixel(7, 3, true);
+	draw_pixel(8, 2, true);
+	draw_pixel(9, 1, true);
+	draw_pixel(10, 0, true);
+	draw_pixel(11, 7, true);
+	draw_pixel(12, 5, true);
+	draw_pixel(13, 3, true);
+	draw_pixel(14, 1, true);
+	draw_pixel(15, 0, true);
+
+
+  // ROTATION 3
+	// draw_pixel(0, 0, true); // top right 
+	// draw_pixel(1, 0, true);   // one down from top right
+	// draw_pixel(2, 0, true);     // two down from top right
+	// draw_pixel(0, 1, true);     // one left from top right
+
+  // ROTATION 0
+	// draw_pixel(0, 0, true); // bottom right of left panel
+
+  // ROTATION 1
+	// draw_pixel(0, 0, true); // bottom left of left panel
+	// draw_pixel(1, 0, true);   // one up from bottom left of left panel
+	// draw_pixel(0, 1, true);
+	// draw_pixel(0, 1, true);
+	// draw_pixel(0, 1, true);
+
+  // ROTATION 2 - starts at top left of right panel, x goes right, y goes down, from 0 to 7 on each axis
+	// draw_pixel(0, 0, true);   // top left of right panel
+	// draw_pixel(1, 0, true);     // one right from top left of right panel
+	// draw_pixel(0, 1, true);
+	// draw_pixel(1, 2, true);
+	// draw_pixel(2, 4, true);
+	// draw_pixel(3, 7, true);
+	// draw_pixel(7, 7, true);
+	// draw_pixel(0, 8, true);   // top left of left panel
+	// draw_pixel(1, 8, true);     // one right from top left of left panel
+	// draw_pixel(14, 2, true);
+	// draw_pixel(15, 5, true);
 	write_all();
 
 	set_blink_rate(HT16K33_BLINK_OFF);
