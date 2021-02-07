@@ -336,35 +336,6 @@ void matrix_init_kb(void) {
 	draw_pixel(14, 1, true);
 	draw_pixel(15, 0, true);
 
-
-  // ROTATION 3
-	// draw_pixel(0, 0, true); // top right 
-	// draw_pixel(1, 0, true);   // one down from top right
-	// draw_pixel(2, 0, true);     // two down from top right
-	// draw_pixel(0, 1, true);     // one left from top right
-
-  // ROTATION 0
-	// draw_pixel(0, 0, true); // bottom right of left panel
-
-  // ROTATION 1
-	// draw_pixel(0, 0, true); // bottom left of left panel
-	// draw_pixel(1, 0, true);   // one up from bottom left of left panel
-	// draw_pixel(0, 1, true);
-	// draw_pixel(0, 1, true);
-	// draw_pixel(0, 1, true);
-
-  // ROTATION 2 - starts at top left of right panel, x goes right, y goes down, from 0 to 7 on each axis
-	// draw_pixel(0, 0, true);   // top left of right panel
-	// draw_pixel(1, 0, true);     // one right from top left of right panel
-	// draw_pixel(0, 1, true);
-	// draw_pixel(1, 2, true);
-	// draw_pixel(2, 4, true);
-	// draw_pixel(3, 7, true);
-	// draw_pixel(7, 7, true);
-	// draw_pixel(0, 8, true);   // top left of left panel
-	// draw_pixel(1, 8, true);     // one right from top left of left panel
-	// draw_pixel(14, 2, true);
-	// draw_pixel(15, 5, true);
 	write_all();
 
 	set_blink_rate(HT16K33_BLINK_OFF);
