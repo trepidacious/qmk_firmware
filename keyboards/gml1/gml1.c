@@ -279,7 +279,7 @@ static void draw_pixel(int16_t x, int16_t y, uint16_t color) {
 void clear(void) {
   for (uint8_t i = 0; i < 8; i++) {
     alpha_display_buffer[i] = 0;
-	matrix_display_buffer[i] = 0;
+	  matrix_display_buffer[i] = 0;
   }
 }
 
@@ -319,23 +319,6 @@ void matrix_init_kb(void) {
 	write_digit_ascii(2, 'L', false);
 	write_digit_ascii(3, '1', false);
 
-	draw_pixel(0, 1, true);
-	draw_pixel(1, 2, true);
-	draw_pixel(2, 4, true);
-	draw_pixel(3, 7, true);
-	draw_pixel(4, 6, true);
-	draw_pixel(5, 5, true);
-	draw_pixel(6, 4, true);
-	draw_pixel(7, 3, true);
-	draw_pixel(8, 2, true);
-	draw_pixel(9, 1, true);
-	draw_pixel(10, 0, true);
-	draw_pixel(11, 7, true);
-	draw_pixel(12, 5, true);
-	draw_pixel(13, 3, true);
-	draw_pixel(14, 1, true);
-	draw_pixel(15, 0, true);
-
 	write_all();
 
 	set_blink_rate(HT16K33_BLINK_OFF);
@@ -346,6 +329,8 @@ static bool splash = true;
 
 bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
 
+  bool process = true;
+
 	process_record_user(keycode, record);
 
 	if (splash) {
@@ -353,26 +338,38 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
 		splash = false;
 	}
 
-    switch (keycode) {
+  int x = record->event.key.col;
+  int y = record->event.key.row;
+  // Adapt for particular layout of rows and columns
+  if (y > 3) {
+    y -= 4;
+    x = 11 - x;
+  }
+
+  draw_pixel(x + 2, y + 2, record->event.pressed);
+
+  switch (keycode) {
 		case KC_VOLU:
 			if (record->event.pressed){
 				brighter();
 				write_digit_ascii(1, 'B', false);
 				write_digit_ascii(2, '0' + brightness / 10, false);
 				write_digit_ascii(3, '0' + brightness % 10, false);
-				write_digits();
+				// write_digits();
 			} 
-			return true;
+			process = true;
+      
 		case KC_VOLD:
 			if (record->event.pressed) {
 				dimmer();
 				write_digit_ascii(1, 'B', false);
 				write_digit_ascii(2, '0' + brightness / 10, false);
 				write_digit_ascii(3, '0' + brightness % 10, false);
-				write_digits();
+				// write_digits();
 			}
-			return true;
-        default:
+			process = true;
+
+    default:
 			write_digit_ascii(1, 'G', false);
 			write_digit_ascii(2, 'm', false);
 			write_digit_ascii(3, 'L', false);
@@ -380,9 +377,13 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
 			// write_digit_ascii(1, '0' + wpm / 100, false);
 			// write_digit_ascii(2, '0' + (wpm / 10) % 10, false);
 			// write_digit_ascii(3, '0' + brightness % 10, false);
-			write_digits();
-			return true;  // Process all other keycodes normally
-    }
+			// write_digits();
+			process = true;  // Process all other keycodes normally
+  }
+
+  write_all();
+
+  return process;
 }
 
 layer_state_t layer_state_set_kb(layer_state_t state) {
@@ -395,6 +396,9 @@ layer_state_t layer_state_set_kb(layer_state_t state) {
 		case 2:
 			write_digit_raw(0, 0b1);
 			break;
+		case 3:
+			write_digit_ascii(0, '+', false);
+			break;
 		default:
 			write_digit_ascii(0, '-', false);
 	}
@@ -406,128 +410,3 @@ layer_state_t layer_state_set_kb(layer_state_t state) {
 void matrix_scan_kb(void) {
 	matrix_scan_user();
 }
-
-// bool is_keyboard_master(void) {
-//     // TODO Can we find out whether we are left or right from qmk?
-//     setPinInput(SPLIT_HAND_PIN);
-//     bool master = readPin(SPLIT_HAND_PIN);
-
-//     return master;
-// }
-
-
-// // Each hand (master and slave) has half the rows of the matrix
-// #define ROWS_PER_HAND (MATRIX_ROWS / 2)
-// #define SMATRIX_SIZE (ROWS_PER_HAND * sizeof(matrix_row_t))
-
-// enum serial_transaction_id {
-//     GET_SLAVE_MATRIX = 0,
-// #    if defined(RGBLIGHT_ENABLE) && defined(RGBLIGHT_SPLIT)
-//     PUT_RGBLIGHT,
-// #    endif
-// };
-
-// // Copy of the matric on the slave, for SlaveThread to send when queried
-// static matrix_row_t smatrix[ROWS_PER_HAND];
-// // static mutex_t smatrix_mtx;
-
-// static SerialConfig serial_cfg = {
-//     1000000,
-//     0,
-//     0,
-//     USART_CR3_HDSEL
-// };
-
-// /*
-//  * This thread runs on the slave and responds to transactions initiated
-//  * by the master
-//  */
-// static THD_WORKING_AREA(waSlaveThread, 2048);
-// static THD_FUNCTION(SlaveThread, arg) {
-//   (void)arg;
-//   chRegSetThreadName("slave_transport");
-//   while (true) {
-//     enum serial_transaction_id tid = sdGet(&SD3);
-//     if (tid == GET_SLAVE_MATRIX) {
-//         // chMtxLock(&smatrix_mtx);
-//         sdWrite(&SD3, smatrix, SMATRIX_SIZE);
-//         // chMtxUnlock(&smatrix_mtx);
-
-//         // TODO can we avoid the need to read back our own data?
-//         // Read back what we wrote...
-//         sdRead(&SD3, smatrix, SMATRIX_SIZE);
-//     }
-//   }
-// }
-
-// bool transport_master(matrix_row_t matrix[]) {
-
-//     // Clear the buffer
-//     while(sdGetTimeout(&SD3, TIME_IMMEDIATE) != MSG_TIMEOUT);
-
-//     // Read data from slave and set matrix
-//     sdPut(&SD3, GET_SLAVE_MATRIX);
-//     // Read back and discard what we just wrote
-//     sdGet(&SD3);
-//     msg_t read_result = sdReadTimeout(&SD3, smatrix, SMATRIX_SIZE, MS2ST(5));
-//     if (read_result < 0) {
-//         // Error, e.g. timeout
-//         return false;
-
-//     } else {
-//         memcpy(matrix, smatrix, SMATRIX_SIZE);
-//         palToggleLine(LINE_D13);
-//         return true;
-//     }
-// }
-
-// void transport_slave(matrix_row_t matrix[]) {
-//     // chMtxLock(&smatrix_mtx);
-//     memcpy(smatrix, matrix, SMATRIX_SIZE);
-//     // chMtxUnlock(&smatrix_mtx);
-// }
-
-
-// /**
-//  * Configure uart for split-keyboard comms
-//  */
-// void gml1_init_uart(void) {
-//     // // Default settings are fine - set speed in halconf.h
-//     // sdStart(&SD3, NULL);
-//     // // USART3 is AF7 on these pins
-//     // palSetPadMode(GPIOB, GPIOB_TX_D1, PAL_MODE_ALTERNATE(7));
-//     // palSetPadMode(GPIOB, GPIOB_RX_D0, PAL_MODE_ALTERNATE(7));
-
-//     // Configure in half-duplex - note this needs a strong pull-up on
-//     // TX pin to work at higher speeds.
-//     sdStart(&SD3, &serial_cfg);
-
-//     // USART3 is AF7 on TX, which must be a open drain when not controlled
-//     // by peripheral
-//     const uint32_t modeTx = PAL_MODE_ALTERNATE(7) | PAL_STM32_OTYPE_OPENDRAIN
-//       | PAL_MODE_INPUT_PULLUP | PAL_STM32_OSPEED_HIGHEST | PAL_STM32_MODE_ALTERNATE;
-
-//     palSetPadMode(GPIOB, GPIOB_TX_D1, modeTx);
-// }
-
-// void transport_master_init(void) {
-
-//     gml1_init_uart();
-
-//     // Master has LED on
-//     setPinOutput(LINE_D13);
-//     writePin(LINE_D13, 1);
-
-// }
-
-// void transport_slave_init(void){
-
-//     gml1_init_uart();
-
-//     // Slave has LED off initially
-//     setPinOutput(LINE_D13);
-//     writePin(LINE_D13, 0);
-
-//     // Start transport thread
-//     chThdCreateStatic(waSlaveThread, sizeof(waSlaveThread), HIGHPRIO - 10, SlaveThread, NULL);
-// }
