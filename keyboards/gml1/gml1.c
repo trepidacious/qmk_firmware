@@ -358,6 +358,7 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
 				// write_digits();
 			} 
 			process = true;
+      break;
       
 		case KC_VOLD:
 			if (record->event.pressed) {
@@ -368,6 +369,7 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
 				// write_digits();
 			}
 			process = true;
+      break;
 
     default:
 			write_digit_ascii(1, 'G', false);
@@ -379,6 +381,7 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
 			// write_digit_ascii(3, '0' + brightness % 10, false);
 			// write_digits();
 			process = true;  // Process all other keycodes normally
+      break;
   }
 
   write_all();
